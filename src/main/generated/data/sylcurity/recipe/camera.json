@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "sylcurity",
+  "key": {
+    "b": "minecraft:redstone_block",
+    "e": "minecraft:ender_pearl",
+    "g": "minecraft:glass_pane",
+    "i": "minecraft:iron_ingot"
+  },
+  "pattern": [
+    "iii",
+    "ibi",
+    "ege"
+  ],
+  "result": {
+    "count": 1,
+    "id": "sylcurity:camera"
+  }
+}

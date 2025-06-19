@@ -1,30 +1,31 @@
 {
 	"schemaVersion": 1,
-	"id": "polymer-template-mod",
+	"id": "sylcurity",
 	"version": "${version}",
-	"name": "Polymer Template Mod",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"name": "Sylcurity",
+	"description": "Polymer-based security mod.",
 	"authors": [
-		"CHANGE ME"
+		"sylvie <3"
 	],
 	"contact": {
-		"homepage": "https://polymer.pb4.eu/latest/",
-		"sources": "https://github.com/sylvxa/polymer-template-mod"
+		"homepage": "https://sylvie.lol/",
+		"sources": "https://github.com/sylvxa/sylcurity"
 	},
 	"license": "CC0-1.0",
-	"icon": "assets/polymer-template-mod/icon.png",
+	"icon": "assets/sylcurity/icon.png",
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"com.example.PolymerTemplateMod"
+			"lol.sylvie.sylcurity.Sylcurity"
 		],
 		"fabric-datagen": [
-			"com.example.datagen.PolymerTemplateModDataGenerator"
+			"lol.sylvie.sylcurity.datagen.SylcurityDataGenerator"
 		]
 	},
 	"mixins": [
-		"polymer-template-mod.mixins.json"
+		"sylcurity.mixins.json"
 	],
+	"accessWidener": "sylcurity.accesswidener",
 	"depends": {
 		"fabricloader": ">=0.16.14",
 		"minecraft": "~1.21.5",

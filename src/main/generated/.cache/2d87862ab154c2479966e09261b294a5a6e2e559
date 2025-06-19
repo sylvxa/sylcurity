@@ -1,0 +1,11 @@
+// 1.21.6 Release Candidate 1	-999999999-01-01T00:00:00	Sylcurity/SylcurityRecipeGenerator
+cbefe89c098e9354918d55889c0af5d4b8e7f0be data/sylcurity/advancement/recipes/misc/activity_log.json
+59529d594aea6242c4604620503fde212fff6524 data/sylcurity/advancement/recipes/misc/camera.json
+eba978aacfcad51b4e29c57529f8b8c18f6d6be5 data/sylcurity/advancement/recipes/misc/event_receiver.json
+b452405d38ab6fedc941eeb012cf580d62a67cf6 data/sylcurity/advancement/recipes/misc/player_detector.json
+ac1d539bfa34957c06dae1a3c48caac54698f716 data/sylcurity/advancement/recipes/misc/terminal.json
+95b1e0e29edb9966800153b2bc63c5b0d509ef6e data/sylcurity/recipe/activity_log.json
+1fa9650e072899fd3fab12dfa37c78901b42dc5a data/sylcurity/recipe/camera.json
+396d4a0bd39f13ef349fbeddee79e81ee937362d data/sylcurity/recipe/event_receiver.json
+7603139fcbad15e48c7bb2c3d2668a4d2382ad8d data/sylcurity/recipe/player_detector.json
+6be9fa7d129470c26b1cc6a4d0147e6112789ff0 data/sylcurity/recipe/terminal.json

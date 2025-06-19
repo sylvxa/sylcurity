@@ -1,0 +1,6 @@
+// 1.21.6 Release Candidate 1	-999999999-01-01T00:00:00	Sylcurity/Block Loot Tables
+6d8bf2145d4b3933d048b3fac5e7c6af4a1655c4 data/sylcurity/loot_table/blocks/activity_log.json
+7b48e9a9f411c137e3b6d6f649be97c8d54f5769 data/sylcurity/loot_table/blocks/camera.json
+a310577bcdbe1a0003d2428507339abbb63c07d8 data/sylcurity/loot_table/blocks/event_receiver.json
+022f8d9282c610d8537647ba926acb7fa8a9fbbb data/sylcurity/loot_table/blocks/player_detector.json
+f6f6405fb6b0238f9bd449cb8b73ba9f249c54fa data/sylcurity/loot_table/blocks/terminal.json

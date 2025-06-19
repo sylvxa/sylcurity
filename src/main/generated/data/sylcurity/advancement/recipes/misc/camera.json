@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_terminal": {
+      "conditions": {
+        "items": [
+          {
+            "items": "sylcurity:terminal"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "sylcurity:camera"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_terminal"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "sylcurity:camera"
+    ]
+  }
+}

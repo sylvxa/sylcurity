@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "package": "lol.sylvie.sylcurity.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "EntityMixin",
+    "EntityPredicatesMixin",
+    "PlayerEntityMixin",
+    "ScreenHandlerMixin",
+    "ServerCommonNetworkHandlerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+	}
+}

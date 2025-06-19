@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "sylcurity",
+  "key": {
+    "e": "minecraft:ender_pearl",
+    "i": "minecraft:redstone_torch",
+    "r": "minecraft:redstone",
+    "s": "minecraft:smooth_stone"
+  },
+  "pattern": [
+    "iri",
+    "ses",
+    "sss"
+  ],
+  "result": {
+    "count": 1,
+    "id": "sylcurity:event_receiver"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "sylcurity",
+  "key": {
+    "i": "minecraft:iron_ingot",
+    "l": "minecraft:lectern",
+    "p": "minecraft:paper"
+  },
+  "pattern": [
+    "ppp",
+    "plp",
+    "iii"
+  ],
+  "result": {
+    "count": 1,
+    "id": "sylcurity:activity_log"
+  }
+}

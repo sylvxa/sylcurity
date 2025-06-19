@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "sylcurity",
+  "key": {
+    "b": "minecraft:redstone_block",
+    "i": "minecraft:iron_ingot",
+    "r": "minecraft:redstone_torch",
+    "s": "minecraft:sculk_sensor",
+    "t": "minecraft:tripwire_hook"
+  },
+  "pattern": [
+    "rsr",
+    "tbt",
+    "iii"
+  ],
+  "result": {
+    "count": 1,
+    "id": "sylcurity:player_detector"
+  }
+}

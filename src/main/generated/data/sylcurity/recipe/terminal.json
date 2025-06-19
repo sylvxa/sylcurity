@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "sylcurity",
+  "key": {
+    "b": "minecraft:redstone_block",
+    "g": "minecraft:glass_pane",
+    "i": "minecraft:iron_ingot"
+  },
+  "pattern": [
+    "iii",
+    "ibi",
+    "igi"
+  ],
+  "result": {
+    "count": 1,
+    "id": "sylcurity:terminal"
+  }
+}

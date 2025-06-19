@@ -29,6 +29,10 @@ fabricApi {
 	}
 }
 
+loom {
+	accessWidenerPath = file("src/main/resources/sylcurity.accesswidener")
+}
+
 dependencies {
 	// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
@@ -40,9 +44,13 @@ dependencies {
 
 	// Polymer
 	modImplementation include("eu.pb4:polymer-core:${project.polymer_version}")
+	modImplementation include("eu.pb4:polymer-blocks:${project.polymer_version}")
+	modImplementation include("eu.pb4:polymer-resource-pack:${project.polymer_version}")
+	modImplementation include("eu.pb4:polymer-virtual-entity:${project.polymer_version}")
+	modImplementation compileOnly("eu.pb4:polymer-autohost:${project.polymer_version}")
 
 	// SGUI, you probably want this for UI but it depends on your use case
-	// modImplementation include("eu.pb4:sgui:${project.sgui_version}")
+	modImplementation include("eu.pb4:sgui:${project.sgui_version}")
 
 	// Server-Translations
 	modImplementation include("xyz.nucleoid:server-translations-api:${project.server_translations_version}")
