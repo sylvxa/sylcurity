@@ -1,7 +1,6 @@
 package lol.sylvie.sylcurity.messaging;
 
 import net.minecraft.block.Block;
-import net.minecraft.registry.Registries;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
