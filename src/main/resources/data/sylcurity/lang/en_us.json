@@ -22,5 +22,7 @@
   "menu.sylcurity.trusted.remove": "Remove",
   "message.sylcurity.type": "Event Type",
   "message.sylcurity.player_detection": "Player Detection",
-  "message.sylcurity.security_access": "Security Access"
+  "message.sylcurity.player_detection.format": "[%s] %s detected at %s",
+  "message.sylcurity.security_access": "Security Access",
+  "message.sylcurity.security_access.format": "[%s] %s accessed %s"
 }

@@ -80,10 +80,10 @@ public class SecurityMessage {
 		@Override
 		public String asString() {
 			assert player != null;
-			return String.format("[%s] Player %s detected at %s",
+			return Text.translatable("message.sylcurity.player_detection.format",
 					this.timestamp(),
 					FormattingUtil.player(player),
-					this.name);
+					this.name).getString();
 		}
 	}
 
@@ -97,10 +97,10 @@ public class SecurityMessage {
 		@Override
 		public String asString() {
 			assert player != null;
-			return String.format("[%s] %s accessed %s",
+			return Text.translatable("message.sylcurity.security_access.format",
 					this.timestamp(),
 					FormattingUtil.player(player),
-					this.name);
+					this.name).getString();
 		}
 	}
 }

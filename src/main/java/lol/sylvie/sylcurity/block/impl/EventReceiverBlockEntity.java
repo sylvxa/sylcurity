@@ -5,9 +5,12 @@ import lol.sylvie.sylcurity.block.ModBlocks;
 import lol.sylvie.sylcurity.block.SecurityBlockEntity;
 import lol.sylvie.sylcurity.messaging.SecurityMessage;
 import net.minecraft.block.BlockState;
+import net.minecraft.particle.DustParticleEffect;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.storage.ReadView;
 import net.minecraft.storage.WriteView;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 
 public class EventReceiverBlockEntity extends SecurityBlockEntity {
 	private boolean activated;
@@ -42,6 +45,9 @@ public class EventReceiverBlockEntity extends SecurityBlockEntity {
 		world.updateNeighbors(pos, state.getBlock());
 		world.scheduleBlockTick(pos, ModBlocks.EVENT_RECEIVER, 4);
 		world.setBlockState(pos, state.with(EventReceiverBlock.POWERED, true));
+		Vec3d pos = this.getPos().toCenterPos().add(0, 0.6, 0);
+		if (world instanceof ServerWorld serverWorld)
+			serverWorld.spawnParticles(new DustParticleEffect(0xFF0000, 1f), pos.x, pos.y, pos.z, 3, 0.05d, 0.05d, 0.05d, 1d);
 	}
 
 	public SecurityMessage.Type getEventType() {

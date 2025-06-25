@@ -5,6 +5,7 @@ import eu.pb4.polymer.blocks.api.BlockModelType;
 import eu.pb4.polymer.blocks.api.PolymerBlockModel;
 import eu.pb4.polymer.blocks.api.PolymerBlockResourceUtils;
 import eu.pb4.polymer.blocks.api.PolymerTexturedBlock;
+import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import lol.sylvie.sylcurity.Sylcurity;
 import lol.sylvie.sylcurity.block.SecurityBlock;
 import lol.sylvie.sylcurity.gui.CommonDialogs;
@@ -55,6 +56,7 @@ public class EventReceiverBlock extends SecurityBlock implements PolymerTextured
 
 	@Override
 	public BlockState getPolymerBlockState(BlockState blockState, PacketContext packetContext) {
+		if (!PolymerResourcePackUtils.hasMainPack(packetContext)) return Blocks.LODESTONE.getDefaultState();
 		return BLOCKSTATES.get(blockState);
 	}
 

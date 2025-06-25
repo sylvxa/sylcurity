@@ -11,7 +11,7 @@ import net.minecraft.util.math.BlockPos;
 import java.util.ArrayList;
 
 public class ActivityLogBlockEntity extends SecurityBlockEntity {
-	public static final int MAX_LINES = 32;
+	public static final int MAX_LINES = 128;
 	public ArrayList<String> lines;
 
 	public ActivityLogBlockEntity(BlockPos pos, BlockState state) {

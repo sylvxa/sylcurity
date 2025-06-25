@@ -2,6 +2,7 @@ package lol.sylvie.sylcurity.block;
 
 import eu.pb4.polymer.core.api.block.PolymerHeadBlock;
 import eu.pb4.polymer.core.api.item.PolymerHeadBlockItem;
+import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import lol.sylvie.sylcurity.Sylcurity;
 import eu.pb4.polymer.core.api.item.PolymerBlockItem;
 import lol.sylvie.sylcurity.block.impl.ActivityLogBlock;
@@ -13,6 +14,7 @@ import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
@@ -20,6 +22,9 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import xyz.nucleoid.packettweaker.PacketContext;
 
 import java.util.function.Function;
 
@@ -69,15 +74,25 @@ public class ModBlocks {
 
             Item.Settings itemSettings = new Item.Settings().registryKey(itemKey).useBlockPrefixedTranslationKey();
 
-            BlockItem blockItem;
-            if (block instanceof PolymerHeadBlock head)
-                blockItem = new PolymerHeadBlockItem((Block & PolymerHeadBlock) head, itemSettings);
-            else blockItem = new PolymerBlockItem(block, itemSettings, polymerItem, true);
+            BlockItem blockItem = getBlockItem(polymerItem, block, itemSettings);
 
             Registry.register(Registries.ITEM, itemKey, blockItem);
         }
 
         return Registry.register(Registries.BLOCK, blockKey, block);
+    }
+
+    private static @NotNull BlockItem getBlockItem(Item polymerItem, Block block, Item.Settings itemSettings) {
+        BlockItem blockItem;
+        if (block instanceof PolymerHeadBlock head)
+            blockItem = new PolymerHeadBlockItem((Block & PolymerHeadBlock) head, itemSettings);
+        else blockItem = new PolymerBlockItem(block, itemSettings, polymerItem, true) {
+            @Override
+            public @Nullable Identifier getPolymerItemModel(ItemStack stack, PacketContext context) {
+                return PolymerResourcePackUtils.hasMainPack(context) ? super.getPolymerItemModel(stack, context) : null;
+            }
+        };
+        return blockItem;
     }
 
     private static RegistryKey<Block> keyOfBlock(String name) {

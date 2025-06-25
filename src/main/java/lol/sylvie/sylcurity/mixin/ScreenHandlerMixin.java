@@ -1,6 +1,5 @@
 package lol.sylvie.sylcurity.mixin;
 
-import eu.pb4.sgui.virtual.FakeScreenHandler;
 import lol.sylvie.sylcurity.block.impl.camera.CameraViewer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.screen.*;
@@ -16,7 +15,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 		CartographyTableScreenHandler.class,
 		CrafterScreenHandler.class,
 		EnchantmentScreenHandler.class,
-		FakeScreenHandler.class,
 		ForgingScreenHandler.class,
 		Generic3x3ContainerScreenHandler.class,
 		GenericContainerScreenHandler.class,

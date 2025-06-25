@@ -26,6 +26,6 @@ public class Sylcurity implements ModInitializer {
 
 		PolymerResourcePackUtils.addModAssets(MOD_ID);
 
-		LOGGER.info("Hello Fabric world!");
+		LOGGER.info("now 35% more secure");
 	}
 }

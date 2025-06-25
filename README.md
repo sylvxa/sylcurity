@@ -1,23 +1,58 @@
-# Polymer Template Mod
+# Sylcurity
 
-## Usage
+Polymer-based security mod.
 
-To make your own mod, make sure you:
-- Rename instances of `com.example` to your own package name
-- In `fabric.mod.json`
-- - Add your name in the `authors` section
-- - Change the `contact` info to match your mod
-- - Change the `id` and `name`, making sure to follow the conventions specified on the [Fabric Wiki](https://wiki.fabricmc.net/documentation:fabric_mod_json)
-- Change the `MOD_ID` field in the `PolymerTemplateMod` class to your mod id
+![The logo for Sylcurity, which is a Minecraft office with several security devices scattered around](src/main/resources/assets/sylcurity/icon.png)
 
-## Maintaining
+> [!WARNING]  
+> This mod was made in a few days, so don't expect immediate perfection until it's been updated for a while.
 
-Update dependency versions in `gradle.properties` with their respective repository links
+# Usage
 
-## Setup
+### For server owners
 
-For setup instructions please see the [fabric documentation page](https://docs.fabricmc.net/develop/getting-started/setting-up-a-development-environment) that relates to the IDE that you are using.
+Simply drop this mod into the `mods` folder and it will work as expected. However, custom textures for the **Event Receiver** (and future textured blocks/items) can be applied by also installing [Polymer](https://modrinth.com/mod/polymer) and configuring [resource pack hosting](https://polymer.pb4.eu/latest/user/resource-pack-hosting/).
 
-## License
+The mod should work fine with Geyser players once 1.21.6 is released, though dialogs will be a bit weird due to Bedrock form limitations.
 
-This template is available under the CC0 license. Feel free to learn from it and incorporate it in your own project
+### For players
+
+See the features section below. You'll probably want to start with a **Security Terminal** and an **Activity Log**.
+
+# Features
+
+## Security Terminal
+
+The security terminal, when interacted with, opens a GUI that gives access to cameras on your network. It will emit a `Security Access` event on all groups it is in when opened.
+
+## Activity Log
+
+The activity log keeps track of events on the network (as long as it is in loaded chunks). It will receive events from any group it is in.
+
+## Camera
+
+The camera allows for long-range visual monitoring, though it is only accessible when the chunk it's in is loaded. Only players that are trusted can access the camera, even if they are trusted by the access terminal.
+
+*Bedrock players **will** face issues using them due to differences in spectator mechanics.*
+
+## Player Detector
+
+The player detector works like an invisible tripwire with a range of 32 blocks. They do *not* go through blocks or trusted players (more on that later). They have 16 rotation states and will detect on the angle they are placed at. They emit a `Player Detection` event when a player enters its line of sight that is not trusted, and all groups it is in will receive it.
+
+## Event Receiver
+
+The event receiver will emit a redstone signal when it receives the event it is configured for. It will receive events from any group it is in.
+
+## Mechanics
+
+### Trusted Players
+
+Each device keeps a list of trusted players which can interact with it/be ignored by it. 
+
+### Events/Messages
+
+Currently there are only two events, `Security Access` and `Player Detection`. Devices will send their events to every device in every group they are in, and likewise devices will *receive* messages from any group they are in. (this means if you have two devices both in the same two groups, they will send/receive messages twice)
+
+### Cameras
+
+Players using a camera will be teleported to the camera in a fake "spectator" state while a stand-in NPC takes their place. Players may crouch to exit the camera. When the NPC is damaged, it will kick the player out of the camera and apply the damage as expected. The player is not allowed to interact with any blocks or entities while using the camera, nor can they move their camera. The mod tries its best to prevent any teleportation or state persistence if the server crashes mid-camera-view, but it may happen anyway if the crash is severe enough. *(tl;dr, if the server crashes disgracefully the player may be teleported to the camera they are using.)*

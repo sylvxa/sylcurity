@@ -49,9 +49,6 @@ dependencies {
 	modImplementation include("eu.pb4:polymer-virtual-entity:${project.polymer_version}")
 	modImplementation compileOnly("eu.pb4:polymer-autohost:${project.polymer_version}")
 
-	// SGUI, you probably want this for UI but it depends on your use case
-	modImplementation include("eu.pb4:sgui:${project.sgui_version}")
-
 	// Server-Translations
 	modImplementation include("xyz.nucleoid:server-translations-api:${project.server_translations_version}")
 }
