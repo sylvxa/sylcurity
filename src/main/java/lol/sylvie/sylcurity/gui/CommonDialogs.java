@@ -44,12 +44,12 @@ public class CommonDialogs {
 
 			String name = data.getString("name", "");
 			if (name.length() > SecurityBlockEntity.MAX_NAME_LENGTH) {
-				player.sendMessage(Text.translatable("menu.sylcurity.input_error", "Name too long").formatted(Formatting.RED), true);
+				player.sendMessage(Text.translatable("menu.sylcurity.error.name_too_long").formatted(Formatting.RED), true);
 			} else block.setName(name);
 
 			String channel = data.getString("channel", "");
 			if (channel.length() > SecurityBlockEntity.MAX_TAG_LENGTH) {
-				player.sendMessage(Text.translatable("menu.sylcurity.input_error", "Channel too long").formatted(Formatting.RED), true);
+				player.sendMessage(Text.translatable("menu.sylcurity.error.channel_too_long").formatted(Formatting.RED), true);
 			} else block.setChannel(channel);
 
 			String groupTags = data.getString("groups", "");
@@ -59,7 +59,7 @@ public class CommonDialogs {
 					.distinct()
 					.toList();
 			if (split.size() > SecurityBlockEntity.MAX_GROUPS) {
-				player.sendMessage(Text.translatable("menu.sylcurity.input_error", "Too many groups").formatted(Formatting.RED), true);
+				player.sendMessage(Text.translatable("menu.sylcurity.error.too_many_groups").formatted(Formatting.RED), true);
 			} else block.setGroups(new ArrayList<>(split));
 		});
 
@@ -86,12 +86,12 @@ public class CommonDialogs {
 			assert player.getServer() != null;
 			ServerPlayerEntity target = player.getServer().getPlayerManager().getPlayer(username);
 			if (target == null) {
-				player.sendMessage(Text.translatable("menu.sylcurity.input_error", "Player must be online!").formatted(Formatting.RED), true);
+				player.sendMessage(Text.translatable("menu.sylcurity.error.player_not_found").formatted(Formatting.RED), true);
 			} else {
 				GameProfile profile = target.getGameProfile();
 				UUID id = profile.getId();
 				if (id.equals(entity.getOwner())) {
-					player.sendMessage(Text.translatable("menu.sylcurity.input_error", "Owners are implicitly trusted!").formatted(Formatting.RED), true);
+					player.sendMessage(Text.translatable("menu.sylcurity.error.no_trust_self").formatted(Formatting.RED), true);
 				} else entity.getTrusted().put(profile.getName(), profile.getId());
 			}
 
@@ -101,7 +101,7 @@ public class CommonDialogs {
 		builder.addActionButton(Identifier.of(Sylcurity.MOD_ID, "remove_player"), Text.translatable("menu.sylcurity.trusted.remove"), data -> {
 			Optional<String> usernameOptional = data.getString("username");
 			if (usernameOptional.isEmpty()) {
-				player.sendMessage(Text.translatable("menu.sylcurity.input_error", "Player not found!").formatted(Formatting.RED), true);
+				player.sendMessage(Text.translatable("menu.sylcurity.error.player_not_trusted").formatted(Formatting.RED), true);
 			} else {
 				String username = usernameOptional.get();
 				entity.getTrusted().remove(username);
