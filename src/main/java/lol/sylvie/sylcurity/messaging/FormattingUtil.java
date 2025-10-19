@@ -12,7 +12,7 @@ public class FormattingUtil {
 	private static DecimalFormat DECIMAL_FORMAT = new DecimalFormat("0.0");
 
 	public static String player(ServerPlayerEntity player) {
-		return player.getGameProfile().getName();
+		return player.getGameProfile().name();
 	}
 
 	public static String pos(Vec3d pos) {

@@ -16,8 +16,7 @@ public class DialogHelper {
 	private static final HashMap<Identifier, HashMap<UUID, Consumer<NbtCompound>>> RESPONSE_MAP = new HashMap<>();
 
 	public static void onCustomClickAction(CustomClickActionC2SPacket packet, ServerPlayerEntity player) {
-		MinecraftServer server = player.getServer();
-		assert server != null;
+		MinecraftServer server = player.getEntityWorld().getServer();
 		if (!server.isOnThread()) {
 			server.execute(() -> {
 				onCustomClickAction(packet, player);
@@ -35,7 +34,6 @@ public class DialogHelper {
 		Optional<NbtElement> nbtCompound = packet.payload();
 		if (nbtCompound.isEmpty() || nbtCompound.get().asCompound().isEmpty()) return;
 
-		assert player.getServer() != null;
 		playerMap.remove(playerId);
 		callback.accept(nbtCompound.get().asCompound().get());
 	}

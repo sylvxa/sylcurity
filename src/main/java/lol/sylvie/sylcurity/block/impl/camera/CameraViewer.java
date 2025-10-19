@@ -13,6 +13,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.PlayerLikeEntity;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
@@ -89,8 +90,8 @@ public class CameraViewer {
 		public CameraSession(ServerWorld world, BlockPos pos, ServerPlayerEntity player) {
 			this.world = world;
 			this.pos = pos;
-			this.initialWorld = player.getWorld();
-			this.initialPos = player.getPos();
+			this.initialWorld = player.getEntityWorld();
+			this.initialPos = player.getEntityPos();
 			this.player = player;
 
 			this.holder = new ElementHolder();
@@ -146,6 +147,7 @@ public class CameraViewer {
 		}
 	}
 
+    // code could probably be decomplexified if we used manequins instead but
 	private static class PlayerEntityElement extends SimpleEntityElement {
 		private final ServerPlayerEntity player;
 		private final FakePlayer fakePlayer;
@@ -155,17 +157,11 @@ public class CameraViewer {
 			this.player = player;
 			copyDataFromPlayer(PlayerEntity.ABSORPTION_AMOUNT);
 			copyDataFromPlayer(PlayerEntity.SCORE);
-			copyDataFromPlayer(PlayerEntity.PLAYER_MODEL_PARTS);
-			copyDataFromPlayer(PlayerEntity.MAIN_ARM);
-			copyDataFromPlayer(PlayerEntity.LEFT_SHOULDER_ENTITY);
-			copyDataFromPlayer(PlayerEntity.RIGHT_SHOULDER_ENTITY);
+            copyDataFromPlayer(PlayerLikeEntity.PLAYER_MODE_CUSTOMIZATION_ID);
+            copyDataFromPlayer(PlayerLikeEntity.MAIN_ARM_ID);
 
-			GameProfile profile = new GameProfile(this.getUuid(), player.getGameProfile().getName());
-			PropertyMap map = player.getGameProfile().getProperties();
-			if (map.containsKey("textures"))
-				profile.getProperties().put("textures", map.get("textures").iterator().next());
-
-			this.fakePlayer = FakePlayer.get(player.getWorld(), profile);
+			GameProfile profile = new GameProfile(this.getUuid(), player.getGameProfile().name(), player.getGameProfile().properties());
+			this.fakePlayer = FakePlayer.get(player.getEntityWorld(), profile);
 			this.setPitch(player.getPitch());
 			this.setYaw(player.getYaw());
 

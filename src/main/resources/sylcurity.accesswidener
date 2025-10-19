@@ -1,7 +1,7 @@
 accessWidener v2 named
 accessible field net/minecraft/entity/player/PlayerEntity ABSORPTION_AMOUNT Lnet/minecraft/entity/data/TrackedData;
 accessible field net/minecraft/entity/player/PlayerEntity SCORE Lnet/minecraft/entity/data/TrackedData;
-accessible field net/minecraft/entity/player/PlayerEntity PLAYER_MODEL_PARTS Lnet/minecraft/entity/data/TrackedData;
-accessible field net/minecraft/entity/player/PlayerEntity MAIN_ARM Lnet/minecraft/entity/data/TrackedData;
 accessible field net/minecraft/entity/player/PlayerEntity LEFT_SHOULDER_ENTITY Lnet/minecraft/entity/data/TrackedData;
 accessible field net/minecraft/entity/player/PlayerEntity RIGHT_SHOULDER_ENTITY Lnet/minecraft/entity/data/TrackedData;
+accessible field net/minecraft/entity/PlayerLikeEntity PLAYER_MODE_CUSTOMIZATION_ID Lnet/minecraft/entity/data/TrackedData;
+accessible field net/minecraft/entity/PlayerLikeEntity MAIN_ARM_ID Lnet/minecraft/entity/data/TrackedData;

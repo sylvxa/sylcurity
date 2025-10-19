@@ -83,16 +83,15 @@ public class CommonDialogs {
 			}
 
 			String username = usernameOptional.get();
-			assert player.getServer() != null;
-			ServerPlayerEntity target = player.getServer().getPlayerManager().getPlayer(username);
+			ServerPlayerEntity target = player.getEntityWorld().getServer().getPlayerManager().getPlayer(username);
 			if (target == null) {
 				player.sendMessage(Text.translatable("menu.sylcurity.error.player_not_found").formatted(Formatting.RED), true);
 			} else {
 				GameProfile profile = target.getGameProfile();
-				UUID id = profile.getId();
+				UUID id = profile.id();
 				if (id.equals(entity.getOwner())) {
 					player.sendMessage(Text.translatable("menu.sylcurity.error.no_trust_self").formatted(Formatting.RED), true);
-				} else entity.getTrusted().put(profile.getName(), profile.getId());
+				} else entity.getTrusted().put(profile.name(), profile.id());
 			}
 
 			openTrustedDialog(player, entity, openPrevious);
