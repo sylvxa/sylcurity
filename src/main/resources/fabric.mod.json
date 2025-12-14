@@ -5,11 +5,19 @@
 	"name": "Sylcurity",
 	"description": "Polymer-based security mod.",
 	"authors": [
-		"sylvie <3"
+	    {
+	      "name": "sylvxa",
+	      "contact": {
+	        "email": "me@sylvie.lol",
+	        "homepage": "https://sylvie.lol"
+	      }
+	    }
 	],
 	"contact": {
-		"homepage": "https://sylvie.lol/",
-		"sources": "https://github.com/sylvxa/sylcurity"
+	    "repo": "https://github.com/sylvxa/sylcurity",
+	    "homepage": "https://modrinth.com/mod/sylcurity",
+	    "issues": "https://github.com/sylvxa/sylcurity/issues",
+	    "discord": "https://discord.gg/5qzrB98sBA"
 	},
 	"license": "CC0-1.0",
 	"icon": "assets/sylcurity/icon.png",
@@ -27,8 +35,8 @@
 	],
 	"accessWidener": "sylcurity.accesswidener",
 	"depends": {
-		"fabricloader": ">=0.16.14",
-		"minecraft": ">=1.21.9",
+		"fabricloader": ">=${loader_version}",
+		"minecraft": ">=${minecraft_version}",
 		"java": ">=21",
 		"fabric-api": "*"
 	},

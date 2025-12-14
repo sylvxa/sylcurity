@@ -3,21 +3,20 @@ package lol.sylvie.sylcurity.datagen.impl;
 import lol.sylvie.sylcurity.block.ModBlocks;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricBlockLootTableProvider;
-import net.minecraft.registry.RegistryWrapper;
-
+import net.minecraft.core.HolderLookup;
 import java.util.concurrent.CompletableFuture;
 
 public class SylcurityBlockLootTableGenerator extends FabricBlockLootTableProvider {
-	public SylcurityBlockLootTableGenerator(FabricDataOutput dataOutput, CompletableFuture<RegistryWrapper.WrapperLookup> registryLookup) {
+	public SylcurityBlockLootTableGenerator(FabricDataOutput dataOutput, CompletableFuture<HolderLookup.Provider> registryLookup) {
 		super(dataOutput, registryLookup);
 	}
 
 	@Override
 	public void generate() {
-		addDrop(ModBlocks.EVENT_RECEIVER);
-		addDrop(ModBlocks.CAMERA);
-		addDrop(ModBlocks.ACTIVITY_LOG);
-		addDrop(ModBlocks.TERMINAL);
-		addDrop(ModBlocks.PLAYER_DETECTOR);
+		dropSelf(ModBlocks.EVENT_RECEIVER);
+		dropSelf(ModBlocks.CAMERA);
+		dropSelf(ModBlocks.ACTIVITY_LOG);
+		dropSelf(ModBlocks.TERMINAL);
+		dropSelf(ModBlocks.PLAYER_DETECTOR);
 	}
 }

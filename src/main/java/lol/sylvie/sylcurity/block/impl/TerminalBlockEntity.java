@@ -2,12 +2,8 @@ package lol.sylvie.sylcurity.block.impl;
 
 import lol.sylvie.sylcurity.block.ModBlockEntities;
 import lol.sylvie.sylcurity.block.SecurityBlockEntity;
-import net.minecraft.block.BlockState;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.util.Uuids;
-import net.minecraft.util.math.BlockPos;
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
 import java.util.UUID;
 
 public class TerminalBlockEntity extends SecurityBlockEntity {

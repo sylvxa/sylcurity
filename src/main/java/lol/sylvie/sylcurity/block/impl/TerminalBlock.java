@@ -13,19 +13,19 @@ import lol.sylvie.sylcurity.gui.CommonDialogs;
 import lol.sylvie.sylcurity.gui.DialogBuilder;
 import lol.sylvie.sylcurity.messaging.SecurityMessage;
 import lol.sylvie.sylcurity.messaging.SecurityRegistry;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.BlockWithEntity;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 import xyz.nucleoid.packettweaker.PacketContext;
 
@@ -34,17 +34,17 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class TerminalBlock extends HeadSecurityBlock {
-	public TerminalBlock(Settings settings) {
+	public TerminalBlock(Properties settings) {
 		super(settings);
 	}
 
 	@Override
-	protected MapCodec<? extends BlockWithEntity> getCodec() {
-		return createCodec(TerminalBlock::new);
+	protected MapCodec<? extends BaseEntityBlock> codec() {
+		return simpleCodec(TerminalBlock::new);
 	}
 
 	@Override
-	public @Nullable BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+	public @Nullable BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
 		return new TerminalBlockEntity(pos, state);
 	}
 
@@ -54,18 +54,18 @@ public class TerminalBlock extends HeadSecurityBlock {
 	}
 
 	@Override
-	protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity user, BlockHitResult hit) {
-		if (!(world.getBlockEntity(pos) instanceof TerminalBlockEntity terminal) || !(user instanceof ServerPlayerEntity player) || !terminal.checkAccessVisibly(player)) {
-			return super.onUse(state, world, pos, user, hit);
+	protected InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player user, BlockHitResult hit) {
+		if (!(world.getBlockEntity(pos) instanceof TerminalBlockEntity terminal) || !(user instanceof ServerPlayer player) || !terminal.checkAccessVisibly(player)) {
+			return super.useWithoutItem(state, world, pos, user, hit);
 		}
 
 		openTerminalDialog(player, terminal);
 
-		return ActionResult.SUCCESS;
+		return InteractionResult.SUCCESS;
 	}
 
-	public void openTerminalDialog(ServerPlayerEntity player, TerminalBlockEntity entity) {
-		DialogBuilder builder = CommonDialogs.createSecurityBlockSettings(player, entity, Text.translatable(this.getTranslationKey()), nbtCompound -> {}, () -> openTerminalDialog(player, entity));
+	public void openTerminalDialog(ServerPlayer player, TerminalBlockEntity entity) {
+		DialogBuilder builder = CommonDialogs.createSecurityBlockSettings(player, entity, Component.translatable(this.getDescriptionId()), nbtCompound -> {}, () -> openTerminalDialog(player, entity));
 		ArrayList<SecurityBlockEntity> blocks = SecurityRegistry.REGISTRY.getOrDefault(entity.getChannel(), new ArrayList<>());
 		ArrayList<CameraBlockEntity> cameras = new ArrayList<>();
 
@@ -79,7 +79,7 @@ public class TerminalBlock extends HeadSecurityBlock {
 		}
 
 		if (!cameras.isEmpty()) {
-			builder.addActionButton(Identifier.of(Sylcurity.MOD_ID, "camera_select"), Text.translatable("menu.sylcurity.camera"), nbtCompound -> {
+			builder.addActionButton(Identifier.fromNamespaceAndPath(Sylcurity.MOD_ID, "camera_select"), Component.translatable("menu.sylcurity.camera"), nbtCompound -> {
 				openCameraSelector(player, entity, cameras);
 			});
 		}
@@ -89,22 +89,22 @@ public class TerminalBlock extends HeadSecurityBlock {
 		builder.openTo(player);
 	}
 
-	public void openCameraSelector(ServerPlayerEntity player, TerminalBlockEntity parent, List<CameraBlockEntity> blockEntities) {
-		DialogBuilder dialog = new DialogBuilder(player, Text.translatable("menu.sylcurity.camera"));
+	public void openCameraSelector(ServerPlayer player, TerminalBlockEntity parent, List<CameraBlockEntity> blockEntities) {
+		DialogBuilder dialog = new DialogBuilder(player, Component.translatable("menu.sylcurity.camera"));
 		for (CameraBlockEntity blockEntity : blockEntities) {
-			NbtCompound cameraData = new NbtCompound();
+			CompoundTag cameraData = new CompoundTag();
 			cameraData.putInt("index", blockEntities.indexOf(blockEntity));
-			dialog.addActionButton(Identifier.of(Sylcurity.MOD_ID, "view_camera"), Text.literal(blockEntity.getName()), data -> {
+			dialog.addActionButton(Identifier.fromNamespaceAndPath(Sylcurity.MOD_ID, "view_camera"), Component.literal(blockEntity.getName()), data -> {
 				if (blockEntities.isEmpty()) return;
-				int camera = data.getInt("index", 0);
+				int camera = data.getIntOr("index", 0);
 				CameraBlockEntity thisEntity = blockEntities.get(camera);
-				ServerWorld world = (ServerWorld) thisEntity.getWorld();
-				if (world == null || world.getBlockEntity(thisEntity.getPos()) != thisEntity) return;
-				CameraViewer.open(world, thisEntity.getPos(), player);
+				ServerLevel world = (ServerLevel) thisEntity.getLevel();
+				if (world == null || world.getBlockEntity(thisEntity.getBlockPos()) != thisEntity) return;
+				CameraViewer.open(world, thisEntity.getBlockPos(), player);
 			}, cameraData, null);
 		}
 
-		dialog.addActionButton(Identifier.of(Sylcurity.MOD_ID, "back"), Text.translatable("menu.sylcurity.back"), nbtCompound -> {
+		dialog.addActionButton(Identifier.fromNamespaceAndPath(Sylcurity.MOD_ID, "back"), Component.translatable("menu.sylcurity.back"), nbtCompound -> {
 			openTerminalDialog(player, parent);
 		});
 

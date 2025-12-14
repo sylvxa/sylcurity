@@ -1,28 +1,25 @@
 package lol.sylvie.sylcurity.messaging;
 
-import net.minecraft.block.Block;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 
 public class SecurityMessage {
 	protected final Type type;
 	protected final String terminal;
 	protected final @Nullable String group;
 	protected final String name;
-	protected final @Nullable ServerPlayerEntity player;
+	protected final @Nullable ServerPlayer player;
 	protected final Timestamp timestamp;
 
 	private static final SimpleDateFormat FORMAT = new SimpleDateFormat("MM/dd/yy HH:mm:ss");
 
-	public SecurityMessage(Type type, String terminal, @Nullable String group, String name, @Nullable ServerPlayerEntity player) {
+	public SecurityMessage(Type type, String terminal, @Nullable String group, String name, @Nullable ServerPlayer player) {
 		this.type = type;
 		this.terminal = terminal;
 		this.group = group;
@@ -39,7 +36,7 @@ public class SecurityMessage {
 		return group;
 	}
 
-	public @Nullable ServerPlayerEntity getPlayer() {
+	public @Nullable ServerPlayer getPlayer() {
 		return player;
 	}
 
@@ -56,22 +53,22 @@ public class SecurityMessage {
 	}
 
 	public enum Type {
-		PLAYER_DETECTION(Text.translatable("message.sylcurity.player_detection")),
-		SECURITY_ACCESS(Text.translatable("message.sylcurity.security_access"));
+		PLAYER_DETECTION(Component.translatable("message.sylcurity.player_detection")),
+		SECURITY_ACCESS(Component.translatable("message.sylcurity.security_access"));
 
-		private final Text text;
+		private final Component text;
 
-		Type(Text text) {
+		Type(Component text) {
 			this.text = text;
 		}
 
-		public Text getText() {
+		public Component getText() {
 			return text;
 		}
 	}
 
 	public static class PlayerDetection extends SecurityMessage {
-		public PlayerDetection(String terminal, String group, String name, ServerPlayerEntity offender) {
+		public PlayerDetection(String terminal, String group, String name, ServerPlayer offender) {
 			super(Type.PLAYER_DETECTION, terminal, group, name, offender);
 
 			if (offender == null) throw new IllegalStateException("Player detection needs a player, dummy!");
@@ -80,7 +77,7 @@ public class SecurityMessage {
 		@Override
 		public String asString() {
 			assert player != null;
-			return Text.translatable("message.sylcurity.player_detection.format",
+			return Component.translatable("message.sylcurity.player_detection.format",
 					this.timestamp(),
 					FormattingUtil.player(player),
 					this.name).getString();
@@ -88,7 +85,7 @@ public class SecurityMessage {
 	}
 
 	public static class SecurityAccess extends SecurityMessage {
-		public SecurityAccess(String terminal, String group, String name, ServerPlayerEntity offender) {
+		public SecurityAccess(String terminal, String group, String name, ServerPlayer offender) {
 			super(Type.SECURITY_ACCESS, terminal, group, name, offender);
 
 			if (offender == null) throw new IllegalStateException("Access log needs a player!");
@@ -97,7 +94,7 @@ public class SecurityMessage {
 		@Override
 		public String asString() {
 			assert player != null;
-			return Text.translatable("message.sylcurity.security_access.format",
+			return Component.translatable("message.sylcurity.security_access.format",
 					this.timestamp(),
 					FormattingUtil.player(player),
 					this.name).getString();

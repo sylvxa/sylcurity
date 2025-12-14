@@ -3,11 +3,10 @@ package lol.sylvie.sylcurity.block.impl;
 import lol.sylvie.sylcurity.block.ModBlockEntities;
 import lol.sylvie.sylcurity.block.SecurityBlockEntity;
 import lol.sylvie.sylcurity.messaging.SecurityMessage;
-import net.minecraft.block.BlockState;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.util.math.BlockPos;
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import java.util.ArrayList;
 
 public class ActivityLogBlockEntity extends SecurityBlockEntity {
@@ -25,17 +24,17 @@ public class ActivityLogBlockEntity extends SecurityBlockEntity {
 	}
 
 	@Override
-	protected void readData(ReadView view) {
-		super.readData(view);
+	protected void loadAdditional(ValueInput view) {
+		super.loadAdditional(view);
 
 		view.read("lines", STRING_LIST_CODEC).ifPresent(l -> lines = new ArrayList<>(l));
 	}
 
 	@Override
-	protected void writeData(WriteView view) {
-		super.writeData(view);
+	protected void saveAdditional(ValueOutput view) {
+		super.saveAdditional(view);
 
-		view.put("lines", STRING_LIST_CODEC, lines);
+		view.store("lines", STRING_LIST_CODEC, lines);
 	}
 
 	@Override

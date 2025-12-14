@@ -8,12 +8,12 @@ import lol.sylvie.sylcurity.block.impl.PlayerDetectorBlockEntity;
 import lol.sylvie.sylcurity.block.impl.camera.CameraBlockEntity;
 import lol.sylvie.sylcurity.block.impl.TerminalBlockEntity;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
-import net.minecraft.block.Block;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 
 public class ModBlockEntities {
 	public static final BlockEntityType<CameraBlockEntity> CAMERA_BLOCK_ENTITY =
@@ -37,8 +37,8 @@ public class ModBlockEntities {
 			FabricBlockEntityTypeBuilder.Factory<? extends T> entityFactory,
 			Block... blocks
 	) {
-		Identifier id = Identifier.of(Sylcurity.MOD_ID, name);
-		BlockEntityType<T> type = Registry.register(Registries.BLOCK_ENTITY_TYPE, id, FabricBlockEntityTypeBuilder.<T>create(entityFactory, blocks).build());
+		Identifier id = Identifier.fromNamespaceAndPath(Sylcurity.MOD_ID, name);
+		BlockEntityType<T> type = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, id, FabricBlockEntityTypeBuilder.<T>create(entityFactory, blocks).build());
 		PolymerBlockUtils.registerBlockEntity(type);
 		return type;
 	}

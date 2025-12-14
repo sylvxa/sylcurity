@@ -11,29 +11,29 @@ import net.fabricmc.fabric.api.entity.FakePlayer;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.PlayerLikeEntity;
-import net.minecraft.entity.data.TrackedData;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
-import net.minecraft.network.packet.s2c.play.GameStateChangeS2CPacket;
-import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
+import net.minecraft.network.protocol.game.ServerboundInteractPacket;
+import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.state.property.Properties;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RotationPropertyHelper;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.GameMode;
-
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Avatar;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.RotationSegment;
+import net.minecraft.world.phys.Vec3;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -45,28 +45,28 @@ public class CameraViewer {
 		return USERS.containsKey(player);
 	}
 
-	public static void open(ServerWorld world, BlockPos pos, ServerPlayerEntity player) {
-		USERS.put(player.getUuid(), new CameraSession(world, pos, player));
+	public static void open(ServerLevel world, BlockPos pos, ServerPlayer player) {
+		USERS.put(player.getUUID(), new CameraSession(world, pos, player));
 	}
 
-	public static void close(ServerPlayerEntity player) {
-		UUID playerId = player.getUuid();
+	public static void close(ServerPlayer player) {
+		UUID playerId = player.getUUID();
 		if (!USERS.containsKey(playerId)) return;
 		USERS.get(playerId).cleanup();
 		USERS.remove(playerId);
 	}
 
 	public static void initialize() {
-		ServerTickEvents.START_WORLD_TICK.register(serverWorld -> {
-			for (ServerPlayerEntity player : serverWorld.getPlayers()) {
-				if (!USERS.containsKey(player.getUuid())) continue;
-				CameraSession session = USERS.get(player.getUuid());
+		ServerTickEvents.END_WORLD_TICK.register(serverWorld -> {
+			for (ServerPlayer player : List.copyOf(serverWorld.players())) {
+				if (!USERS.containsKey(player.getUUID())) continue;
+				CameraSession session = USERS.get(player.getUUID());
 				session.tick();
 			}
 		});
 
 		ServerPlayerEvents.LEAVE.register(player -> {
-			if (!USERS.containsKey(player.getUuid())) return;
+			if (!USERS.containsKey(player.getUUID())) return;
 			CameraViewer.close(player);
 		});
 
@@ -78,61 +78,61 @@ public class CameraViewer {
 	}
 
 	public static class CameraSession {
-		private final ServerWorld world;
+		private final ServerLevel world;
 		private final BlockPos pos;
-		private final ServerWorld initialWorld;
-		private final Vec3d initialPos;
-		private final ServerPlayerEntity player;
+		private final ServerLevel initialWorld;
+		private final Vec3 initialPos;
+		private final ServerPlayer player;
 
 		private final ElementHolder holder;
 		private final HolderAttachment attachment;
 
-		public CameraSession(ServerWorld world, BlockPos pos, ServerPlayerEntity player) {
+		public CameraSession(ServerLevel world, BlockPos pos, ServerPlayer player) {
 			this.world = world;
 			this.pos = pos;
-			this.initialWorld = player.getEntityWorld();
-			this.initialPos = player.getEntityPos();
+			this.initialWorld = player.level();
+			this.initialPos = player.position();
 			this.player = player;
 
 			this.holder = new ElementHolder();
 			this.holder.addElement(new PlayerEntityElement(player));
 			this.attachment = ChunkAttachment.of(this.holder, initialWorld, initialPos);
 
-			updateGameMode(GameMode.SPECTATOR);
+			updateGameMode(GameType.SPECTATOR);
 
-			player.addStatusEffect(new StatusEffectInstance(StatusEffects.NIGHT_VISION, StatusEffectInstance.INFINITE, 255, true, false, false));
+			player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, MobEffectInstance.INFINITE_DURATION, 255, true, false, false));
 		}
 
-		private void updateGameMode(GameMode target) {
-			GameMode previous = player.getGameMode();
-			player.interactionManager.changeGameMode(target);
-			PlayerListS2CPacket packet = new PlayerListS2CPacket(PlayerListS2CPacket.Action.UPDATE_GAME_MODE, player);
-			player.interactionManager.changeGameMode(previous);
-			player.networkHandler.sendPacket(new GameStateChangeS2CPacket(GameStateChangeS2CPacket.GAME_MODE_CHANGED, target.getIndex()));
-			player.networkHandler.sendPacket(packet);
+		private void updateGameMode(GameType target) {
+			GameType previous = player.gameMode();
+			player.gameMode.changeGameModeForPlayer(target);
+			ClientboundPlayerInfoUpdatePacket packet = new ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_GAME_MODE, player);
+			player.gameMode.changeGameModeForPlayer(previous);
+			player.connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.CHANGE_GAME_MODE, target.getId()));
+			player.connection.send(packet);
 		}
 
 		public void tick() {
 			this.attachment.tick();
 			BlockState state = world.getBlockState(pos);
-			if (!state.isOf(ModBlocks.CAMERA) || player.isSneaking() || player.isDead()) {
+			if (!state.is(ModBlocks.CAMERA) || player.isShiftKeyDown() || player.isDeadOrDying()) {
 				CameraViewer.close(player);
 				return;
 			}
-			int rotation = state.get(Properties.ROTATION);
+			int rotation = state.getValue(BlockStateProperties.ROTATION_16);
 
 			//player.noClip = true;
 			//player.getAbilities().flying = true;
 			//player.sendAbilitiesUpdate();
 
-			player.addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS, 2, 255, true, false, false));
-			player.addStatusEffect(new StatusEffectInstance(StatusEffects.MINING_FATIGUE, 2, 255, true, false, false));
+			player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 2, 255, true, false, false));
+			player.addEffect(new MobEffectInstance(MobEffects.MINING_FATIGUE, 2, 255, true, false, false));
 
-			float yaw = RotationPropertyHelper.toDegrees(rotation) - 180;
-			Vec3d posVec = player.getRotationVector(0, yaw).multiply(0.5);
-			Vec3d displayPos = pos.toCenterPos().add(posVec);
+			float yaw = RotationSegment.convertToDegrees(rotation) - 180;
+			Vec3 posVec = player.calculateViewVector(0, yaw).scale(0.5);
+			Vec3 displayPos = pos.getCenter().add(posVec);
 
-			player.teleport(world, displayPos.x, displayPos.y - 1.7, displayPos.z, Set.of(), yaw, 0, true);
+			player.teleportTo(world, displayPos.x, displayPos.y - 1.7, displayPos.z, Set.of(), yaw, 0, true);
 		}
 
 		public void cleanup() {
@@ -141,62 +141,65 @@ public class CameraViewer {
 			//player.noClip = false;
 			//player.getAbilities().flying = false;
 			//player.sendAbilitiesUpdate();
-			player.teleport(initialWorld, initialPos.x, initialPos.y, initialPos.z, Set.of(), 0, 0, false);
-			player.removeStatusEffect(StatusEffects.NIGHT_VISION);
-			updateGameMode(player.getGameMode());
+			player.teleportTo(initialWorld, initialPos.x, initialPos.y, initialPos.z, Set.of(), 0, 0, false);
+			player.removeEffect(MobEffects.NIGHT_VISION);
+			updateGameMode(player.gameMode());
 		}
 	}
 
-    // code could probably be decomplexified if we used manequins instead but
+    // code could probably be decomplexified if we used mannequins instead but
 	private static class PlayerEntityElement extends SimpleEntityElement {
-		private final ServerPlayerEntity player;
+		private final ServerPlayer player;
 		private final FakePlayer fakePlayer;
 
-		public PlayerEntityElement(ServerPlayerEntity player) {
+		public PlayerEntityElement(ServerPlayer player) {
 			super(EntityType.PLAYER);
 			this.player = player;
-			copyDataFromPlayer(PlayerEntity.ABSORPTION_AMOUNT);
-			copyDataFromPlayer(PlayerEntity.SCORE);
-            copyDataFromPlayer(PlayerLikeEntity.PLAYER_MODE_CUSTOMIZATION_ID);
-            copyDataFromPlayer(PlayerLikeEntity.MAIN_ARM_ID);
+			copyDataFromPlayer(Player.DATA_PLAYER_ABSORPTION_ID);
+			copyDataFromPlayer(Player.DATA_SCORE_ID);
+            copyDataFromPlayer(Avatar.DATA_PLAYER_MODE_CUSTOMISATION);
+            copyDataFromPlayer(Avatar.DATA_PLAYER_MAIN_HAND);
 
 			GameProfile profile = new GameProfile(this.getUuid(), player.getGameProfile().name(), player.getGameProfile().properties());
-			this.fakePlayer = FakePlayer.get(player.getEntityWorld(), profile);
-			this.setPitch(player.getPitch());
-			this.setYaw(player.getYaw());
+			this.fakePlayer = FakePlayer.get(player.level(), profile);
+			this.setPitch(player.getXRot());
+			this.setYaw(player.getYRot());
 
 			this.setInteractionHandler(new InteractionHandler() {
 				@Override
-				public void interact(ServerPlayerEntity attacker, Hand hand) {
-					attacker.networkHandler.onPlayerInteractEntity(PlayerInteractEntityC2SPacket.interact(player, player.isSneaking(), hand));
+				public void interact(ServerPlayer attacker, InteractionHand hand) {
+                    if (attacker.equals(player)) return;
+					attacker.connection.handleInteract(ServerboundInteractPacket.createInteractionPacket(player, player.isShiftKeyDown(), hand));
 				}
 
 				@Override
-				public void interactAt(ServerPlayerEntity attacker, Hand hand, Vec3d pos) {
-					attacker.networkHandler.onPlayerInteractEntity(PlayerInteractEntityC2SPacket.interactAt(player, player.isSneaking(), hand, pos));
+				public void interactAt(ServerPlayer attacker, InteractionHand hand, Vec3 pos) {
+                    if (attacker.equals(player)) return;
+					attacker.connection.handleInteract(ServerboundInteractPacket.createInteractionPacket(player, player.isShiftKeyDown(), hand, pos));
 				}
 
 				@Override
-				public void attack(ServerPlayerEntity attacker) {
+				public void attack(ServerPlayer attacker) {
+                    if (attacker.equals(player)) return;
 					CameraViewer.close(player);
-					attacker.networkHandler.onPlayerInteractEntity(PlayerInteractEntityC2SPacket.attack(player, player.isSneaking()));
+					attacker.connection.handleInteract(ServerboundInteractPacket.createAttackPacket(player, player.isShiftKeyDown()));
 				}
 			});
 		}
 
 		@Override
-		public void startWatching(ServerPlayerEntity observer, Consumer<Packet<ClientPlayPacketListener>> packetConsumer) {
-			packetConsumer.accept(new PlayerListS2CPacket(PlayerListS2CPacket.Action.ADD_PLAYER, fakePlayer));
+		public void startWatching(ServerPlayer observer, Consumer<Packet<ClientGamePacketListener>> packetConsumer) {
+			packetConsumer.accept(new ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER, fakePlayer));
 			super.startWatching(observer, packetConsumer);
 		}
 
 		@Override
-		public void stopWatching(ServerPlayerEntity player, Consumer<Packet<ClientPlayPacketListener>> packetConsumer) {
+		public void stopWatching(ServerPlayer player, Consumer<Packet<ClientGamePacketListener>> packetConsumer) {
 			super.stopWatching(player, packetConsumer);
 		}
 
-		private <T> void copyDataFromPlayer(TrackedData<T> key) {
-			dataTracker.set(key, player.getDataTracker().get(key));
+		private <T> void copyDataFromPlayer(EntityDataAccessor<T> key) {
+			dataTracker.set(key, player.getEntityData().get(key));
 		}
 	}
 }

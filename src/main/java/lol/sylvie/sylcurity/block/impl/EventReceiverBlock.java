@@ -11,23 +11,26 @@ import lol.sylvie.sylcurity.block.SecurityBlock;
 import lol.sylvie.sylcurity.gui.CommonDialogs;
 import lol.sylvie.sylcurity.gui.DialogBuilder;
 import lol.sylvie.sylcurity.messaging.SecurityMessage;
-import net.minecraft.block.*;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.dialog.input.SingleOptionInputControl;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.BooleanProperty;
-import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.dialog.input.SingleOptionInput;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 import xyz.nucleoid.packettweaker.PacketContext;
 
@@ -38,17 +41,17 @@ import java.util.Optional;
 
 public class EventReceiverBlock extends SecurityBlock implements PolymerTexturedBlock {
 	protected final HashMap<BlockState, BlockState> BLOCKSTATES = new HashMap<>();
-	public static final BooleanProperty POWERED = BooleanProperty.of("powered");
+	public static final BooleanProperty POWERED = BooleanProperty.create("powered");
 
-	public EventReceiverBlock(Settings settings) {
+	public EventReceiverBlock(Properties settings) {
 		super(settings);
-		this.setDefaultState(this.getDefaultState().with(POWERED, false));
+		this.registerDefaultState(this.defaultBlockState().setValue(POWERED, false));
 		generateBlockStates();
 	}
 
 	protected void generateBlockStates() {
-		for (BlockState state : this.getStateManager().getStates()) {
-			PolymerBlockModel model = PolymerBlockModel.of(state.get(POWERED) ? Identifier.of(Sylcurity.MOD_ID, "block/event_receiver_on") : Identifier.of(Sylcurity.MOD_ID, "block/event_receiver"));
+		for (BlockState state : this.getStateDefinition().getPossibleStates()) {
+			PolymerBlockModel model = PolymerBlockModel.of(state.getValue(POWERED) ? Identifier.fromNamespaceAndPath(Sylcurity.MOD_ID, "block/event_receiver_on") : Identifier.fromNamespaceAndPath(Sylcurity.MOD_ID, "block/event_receiver"));
 			BlockState display = PolymerBlockResourceUtils.requestBlock(BlockModelType.FULL_BLOCK, model);
 			BLOCKSTATES.put(state, display);
 		}
@@ -56,72 +59,72 @@ public class EventReceiverBlock extends SecurityBlock implements PolymerTextured
 
 	@Override
 	public BlockState getPolymerBlockState(BlockState blockState, PacketContext packetContext) {
-		if (!PolymerResourcePackUtils.hasMainPack(packetContext)) return Blocks.LODESTONE.getDefaultState();
+		if (!PolymerResourcePackUtils.hasMainPack(packetContext)) return Blocks.LODESTONE.defaultBlockState();
 		return BLOCKSTATES.get(blockState);
 	}
 
 	@Override
-	protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-		super.appendProperties(builder);
+	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+		super.createBlockStateDefinition(builder);
 		builder.add(POWERED);
 	}
 
 	@Override
-	protected int getWeakRedstonePower(BlockState state, BlockView world, BlockPos pos, Direction direction) {
+	protected int getSignal(BlockState state, BlockGetter world, BlockPos pos, Direction direction) {
 		EventReceiverBlockEntity entity = (EventReceiverBlockEntity) world.getBlockEntity(pos);
 		if (entity != null && entity.getActivated()) {
 			return 15;
 		}
-		return super.getWeakRedstonePower(state, world, pos, direction);
+		return super.getSignal(state, world, pos, direction);
 	}
 
 	@Override
-	protected boolean emitsRedstonePower(BlockState state) {
+	protected boolean isSignalSource(BlockState state) {
 		return true;
 	}
 
 	@Override
-	protected void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
+	protected void tick(BlockState state, ServerLevel world, BlockPos pos, RandomSource random) {
 		EventReceiverBlockEntity entity = (EventReceiverBlockEntity) world.getBlockEntity(pos);
 		if (entity != null && entity.getActivated()) {
 			entity.reset();
-			world.setBlockState(pos, state.with(EventReceiverBlock.POWERED, false));
-			world.updateNeighbors(pos, world.getBlockState(pos).getBlock());
+			world.setBlockAndUpdate(pos, state.setValue(EventReceiverBlock.POWERED, false));
+			world.updateNeighborsAt(pos, world.getBlockState(pos).getBlock());
 		}
 	}
 
 	@Override
-	protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity user, BlockHitResult hit) {
-		if (!(world.getBlockEntity(pos) instanceof EventReceiverBlockEntity entity) || !(user instanceof ServerPlayerEntity player) || !entity.checkAccessVisibly(player)) {
-			return super.onUse(state, world, pos, user, hit);
+	protected InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player user, BlockHitResult hit) {
+		if (!(world.getBlockEntity(pos) instanceof EventReceiverBlockEntity entity) || !(user instanceof ServerPlayer player) || !entity.checkAccessVisibly(player)) {
+			return super.useWithoutItem(state, world, pos, user, hit);
 		}
 
 		openMenu(player, entity);
-		return ActionResult.SUCCESS;
+		return InteractionResult.SUCCESS;
 	}
 
-	private void openMenu(ServerPlayerEntity player, EventReceiverBlockEntity entity) {
-		List<SingleOptionInputControl.Entry> options = Arrays.stream(SecurityMessage.Type.values())
-				.map(e -> new SingleOptionInputControl.Entry(e.name(), Optional.of(e.getText()), entity.getEventType().equals(e)))
+	private void openMenu(ServerPlayer player, EventReceiverBlockEntity entity) {
+		List<SingleOptionInput.Entry> options = Arrays.stream(SecurityMessage.Type.values())
+				.map(e -> new SingleOptionInput.Entry(e.name(), Optional.of(e.getText()), entity.getEventType().equals(e)))
 				.toList();
-		DialogBuilder builder = CommonDialogs.createSecurityBlockSettings(player, entity, Text.translatable(this.getTranslationKey()), data -> {
-			String value = data.getString("type", SecurityMessage.Type.PLAYER_DETECTION.name());
+		DialogBuilder builder = CommonDialogs.createSecurityBlockSettings(player, entity, Component.translatable(this.getDescriptionId()), data -> {
+			String value = data.getStringOr("type", SecurityMessage.Type.PLAYER_DETECTION.name());
 			try {
 				entity.setEventType(SecurityMessage.Type.valueOf(value));
 			} catch (IllegalArgumentException ignored) {};
 		}, () -> openMenu(player, entity));
 
-		builder.addSingleOptionInput("type", 200, Text.translatable("message.sylcurity.type"), options);
+		builder.addSingleOptionInput("type", 200, Component.translatable("message.sylcurity.type"), options);
 		builder.openTo(player);
 	}
 
 	@Override
-	protected MapCodec<? extends BlockWithEntity> getCodec() {
-		return createCodec(EventReceiverBlock::new);
+	protected MapCodec<? extends BaseEntityBlock> codec() {
+		return simpleCodec(EventReceiverBlock::new);
 	}
 
 	@Override
-	public @Nullable BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+	public @Nullable BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
 		return new EventReceiverBlockEntity(pos, state);
 	}
 }
