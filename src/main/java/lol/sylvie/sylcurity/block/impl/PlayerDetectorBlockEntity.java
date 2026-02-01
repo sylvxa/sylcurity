@@ -5,8 +5,6 @@ import lol.sylvie.sylcurity.block.SecurityBlockEntity;
 import lol.sylvie.sylcurity.messaging.SecurityMessage;
 import lol.sylvie.sylcurity.messaging.SecurityRegistry;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.DustParticleOptions;
-import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
