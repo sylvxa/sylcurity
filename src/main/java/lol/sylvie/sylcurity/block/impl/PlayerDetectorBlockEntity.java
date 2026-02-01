@@ -5,6 +5,8 @@ import lol.sylvie.sylcurity.block.SecurityBlockEntity;
 import lol.sylvie.sylcurity.messaging.SecurityMessage;
 import lol.sylvie.sylcurity.messaging.SecurityRegistry;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -42,16 +44,16 @@ public class PlayerDetectorBlockEntity extends SecurityBlockEntity {
 	}
 
 	private static final double MAX_DIST = 32;
-	public static void tick(Level world, BlockPos blockPos, BlockState blockState, PlayerDetectorBlockEntity entity) {
+	public static void tick(Level level, BlockPos blockPos, BlockState blockState, PlayerDetectorBlockEntity entity) {
 		int rotation = blockState.getValue(BlockStateProperties.ROTATION_16);
 		float yaw = RotationSegment.convertToDegrees(rotation) - 180;
-		Vec3 minPos = blockPos.getCenter().add(0, -.25, 0);
 		Vec3 vector = positionVector(yaw);
+		Vec3 minPos = blockPos.getCenter().add(0, -.25, 0).add(vector.scale(0.3));
 		Vec3 maxPos = minPos.add(vector.scale(MAX_DIST));
 
 		AABB volume = AABB.encapsulatingFullBlocks(blockPos, new BlockPos((int) maxPos.x, (int) maxPos.y, (int) maxPos.z));
-		EntityHitResult result = ProjectileUtil.getEntityHitResult(new FakeEntity(world), minPos.add(vector.scale(0.3)), maxPos, volume, test -> test.isAlwaysTicking() && !test.isSpectator() && !entity.checkAccess(test.getUUID()), MAX_DIST);
-		if (result == null || result.getEntity() == null) {
+		EntityHitResult result = ProjectileUtil.getEntityHitResult(new FakeEntity(level), minPos, maxPos, volume, test -> test.isAlwaysTicking() && !test.isSpectator() && !entity.checkAccess(test.getUUID()), MAX_DIST * MAX_DIST);
+		if (result == null) {
 			if (entity.lastPlayer != null) {
 				entity.lastPlayer = null;
 			}
